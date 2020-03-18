@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: 'doobie'
+      POSTGRES_PASSWORD: 'doobie'
+      POSTGRES_DB: 'doobie'
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d

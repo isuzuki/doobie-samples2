@@ -10,13 +10,7 @@ import doobie.util.transactor.Transactor
 import scala.concurrent.ExecutionContext
 
 object Main extends App {
-  lazy val repository = new ItemRepository {
-    override def findById(id: String): ConnectionIO[Option[Item]] =
-      sql"select id, name from item where id = $id".query[Item].option
-
-    override def update(item: Item): ConnectionIO[Int] =
-      sql"update item set name = ${item.name} where id = ${item.id}".update.run
-  }
+  lazy val repository = new PostgreSQLItemRepository
 
   implicit val cs = IO.contextShift(ExecutionContext.global)
   val xa = Transactor
@@ -33,4 +27,6 @@ object Main extends App {
     result <- EitherT.liftF[ConnectionIO, ExitCase[String], Int](repository.update(item.copy(name = "baz")))
   } yield result
   io2.value.transact(xa).unsafeRunSync().foreach(println)
+
+  repository.getAll.transact(xa).unsafeRunSync().foreach(println)
 }

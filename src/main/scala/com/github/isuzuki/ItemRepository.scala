@@ -11,8 +11,6 @@ trait ItemRepository {
 
 class PostgreSQLItemRepository extends ItemRepository {
   override def getAll: ConnectionIO[Seq[Item]] =
-    // no implicit parameter is known issues
-    // @see https://github.com/tpolecat/doobie/issues/1061
     sql"select id, name from item".query[Item].to[Seq]
 
   override def findById(id: String): ConnectionIO[Option[Item]] =

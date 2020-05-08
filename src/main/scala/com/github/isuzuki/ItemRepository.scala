@@ -6,6 +6,7 @@ import doobie.implicits._
 trait ItemRepository {
   def getAll: ConnectionIO[Seq[Item]]
   def findById(id: String): ConnectionIO[Option[Item]]
+  def insert(item: Item): ConnectionIO[Int]
   def update(item: Item): ConnectionIO[Int]
 }
 
@@ -15,6 +16,9 @@ class PostgreSQLItemRepository extends ItemRepository {
 
   override def findById(id: String): ConnectionIO[Option[Item]] =
     sql"select id, name from item where id = $id".query[Item].option
+
+  override def insert(item: Item): ConnectionIO[Int] =
+    sql"insert into item (id, name) values (${item.id}, ${item.name})".update.run
 
   override def update(item: Item): ConnectionIO[Int] =
     sql"update item set name = ${item.name} where id = ${item.id}".update.run

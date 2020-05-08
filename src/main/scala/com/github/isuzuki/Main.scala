@@ -40,5 +40,20 @@ object Main extends App {
   } yield result
   transactor.use(xa => io2.value.transact(xa)).unsafeRunSync().foreach(println)
 
+  val io3 = OptionT(repository.findById("fuga"))
+    .getOrElseF {
+      val item = Item("fuga", "qux")
+      repository.insert(item).map(_ => item)
+    }
+  transactor.use(xa => io3.transact(xa)).unsafeRunSync()
+
+  val io4 = repository.findById("piyo").flatMap {
+    case Some(item) => doobie.FC.pure(item)
+    case _ =>
+      val item = Item("piyo", "quux")
+      repository.insert(item).map(_ => item)
+  }
+  transactor.use(xa => io4.transact(xa)).unsafeRunSync()
+
   transactor.use(xa => repository.getAll.transact(xa)).unsafeRunSync().foreach(println)
 }
